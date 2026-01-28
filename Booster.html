@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Logic Boost</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: url('Wave with theme.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        #boost-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 700px; /* Fixed width */
+            height: 400px; /* Fixed height to prevent jumping */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        #boostBtn {
+            background-color: rgb(243, 69, 0); /* RGB 243,69,0 */
+            color: black;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 800;
+            font-size: 24px;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 6px 12px rgba(243, 69, 0, 0.3);
+            text-transform: uppercase;
+        }
+
+        #boostBtn:hover {
+            filter: brightness(1.1);
+        }
+
+        #boostBtn:active {
+            transform: scale(0.96);
+        }
+
+        #display-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        #quote-text {
+            font-style: italic;
+            font-size: 2.0rem;
+            color: #222;
+            line-height: 1.4;
+            margin-bottom: 20px;
+            font-weight: 700;
+            min-height: 120px; /* Reserve space for quotes */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #client-name {
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: rgb(243, 69, 0);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="boost-container">
+        <button id="boostBtn" onclick="giveBoost()">I NEED A BOOST</button>
+        
+        <div id="display-area">
+            <div id="quote-text">Remind me how much our clients love us!</div>
+            <div id="client-name"></div>
+        </div>
+    </div>
+
+   <audio id="applauseSound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
+
+    <script>
+        const allQuotes = [
+            { client: "Blue Cross Blue Shield of MA", text: "ML has been a breath of fresh air." }, // [cite: 18]
+            { client: "PSFCU", text: "Amazing work—fantastic!" }, // [cite: 19]
+            { client: "MLMIC", text: "They have their fingers on the pulse of our business." }, // [cite: 20]
+            { client: "Stanford CCCR", text: "Heartfelt thanks for your amazing work" }, // [cite: 21]
+            { client: "Visa", text: "Amazing work—can't wait to see it come to life." }, // [cite: 22]
+            { client: "Baylor Scott & White", text: "Definitely have the A-team." }, // [cite: 23]
+            { client: "Conquer", text: "You helped us get off the ground quickly…kudos!" }, // [cite: 24]
+            { client: "Populus", text: "First impressions are WOW." }, // [cite: 25]
+            { client: "Baylor Scott & White", text: "All in all, I love this!" }, // [cite: 26]
+            { client: "Visa (Truist)", text: "Looks fantastic!" }, // [cite: 27]
+            { client: "Columbia Bank", text: "So refreshing to work with ML already." }, // [cite: 28]
+            { client: "ClarityPay", text: "Another home run! Thank you design team!" }, // [cite: 29]
+            { client: "Geisinger", text: "It's nice to have an agency we can rely on." }, // [cite: 30]
+            { client: "Stanford DoM", text: "SO excited to have this podcast pilot in hand!" }, // [cite: 31]
+            { client: "Velera", text: "Thank you for your incredible efforts" }, // [cite: 32]
+            { client: "Unity House", text: "What a video – that story had me!" }, // [cite: 33]
+            { client: "Blue Cross Blue Shield of MA", text: "I’m thrilled that you all are exploring this… fresh, new thinking, new ideas." }, // [cite: 34]
+            { client: "PayForward", text: "Thank you! You guys are the best!" }, // [cite: 35]
+            { client: "Velera", text: "The video looks fantastic." }, // [cite: 36]
+            { client: "Geisinger", text: "Great thought leaders" }, // [cite: 37]
+            { client: "Unity House", text: "You and your team are incredible." }, // [cite: 38]
+            { client: "Stanford DoM", text: "Thank you for your vision and partnership." }, // [cite: 39]
+            { client: "Visa", text: "I love working with you all…I see you as an extension of our team." }, // [cite: 40]
+            { client: "Columbia Bank", text: "We appreciate all of your recommendations. This is why we chose Media Logic." }, // [cite: 41]
+            { client: "Geisinger", text: "Local agency feel. Big agency delivery." }, // [cite: 42]
+            { client: "Visa", text: "Thank you…your flexibility helps us be more successful" }, // [cite: 43]
+            { client: "Baylor Scott & White", text: "In line with or better than typical Madison Ave agency" }, // [cite: 44]
+            { client: "MLMIC", text: "A great business partner!" }, // [cite: 45]
+            { client: "Blue Cross Blue Shield of MA", text: "They are experts on our business." }, // [cite: 46]
+            { client: "Visa", text: "Wanted to send a big thank you!" } // [cite: 47]
+        ];
+
+        // Specific indices for funny quotes
+        const smalley = { client: "Stuart Smalley", text: "I’m good enough, I’m smart enough, and doggone it, people like me." }; // 
+        const fields = { client: "Sally Fields", text: "You like me. You really like me!" }; // 
+
+        let totalClicks = 0;
+        let pool = [...allQuotes];
+
+        function giveBoost() {
+            totalClicks++;
+            const clientDiv = document.getElementById('client-name');
+            const quoteDiv = document.getElementById('quote-text');
+            const applause = document.getElementById('applauseSound');
+            
+            // Confetti logic
+            confetti({
+                particleCount: 150,
+                spread: 75,
+                origin: { y: 0.6 },
+                colors: ['#F34500', '#000000', '#ffffff'] 
+            });
+
+            let cycles = 0;
+            const maxCycles = 15;
+            
+            const interval = setInterval(() => {
+                // Animation phase - mix in funny quotes too
+                const animList = [...allQuotes, smalley, fields];
+                const randomIdx = Math.floor(Math.random() * animList.length);
+                quoteDiv.innerText = `"${animList[randomIdx].text}"`;
+                clientDiv.innerText = animList[randomIdx].client;
+                cycles++;
+
+                if (cycles >= maxCycles) {
+                    clearInterval(interval);
+                    applause.currentTime = 0;
+applause.play(); // Play applause when cycle lands
+
+                    let selected;
+
+                    // Click sequence logic
+                    if (totalClicks === 3) {
+                        selected = smalley;
+                    } else if (totalClicks === 7) {
+                        selected = fields;
+                    } else {
+                        // Regular randomized logic
+                        if (pool.length === 0) pool = [...allQuotes];
+                        const poolIdx = Math.floor(Math.random() * pool.length);
+                        selected = pool.splice(poolIdx, 1)[0];
+                    }
+                    
+                    quoteDiv.innerText = `"${selected.text}"`;
+                    clientDiv.innerText = selected.client;
+                }
+            }, 70);
+        }
+    </script>
+</body>
+</html>
